@@ -1,0 +1,11 @@
+FROM golang:latest
+
+MAINTAINER Razil "ning"
+
+WORKDIR $GOPATH/src/hellodocker
+ADD . $GOPATH/src/hellodocker
+RUN go build .
+
+EXPOSE 8080
+
+ENTRYPOINT ["./hellodocker"]
