@@ -1,13 +1,9 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/StackExchange/wmi"
 	"io/ioutil"
-	"os"
-	"path/filepath"
-	"strings"
+	"log"
 )
 
 type Storage struct {
@@ -45,6 +41,46 @@ type Files struct {
 }
 
 func main() {
+	var rere []map[string]interface{}
+	res := make(map[string]interface{})
+	myfolder := "D:"
+	files, _ := ioutil.ReadDir("D:")
+	for _, file := range files {
+		if file.IsDir() {
+			//	listFile(myfolder + "/" + file.Name())
+			//	fmt.Println(myfolder + "/" + file.Name())
+			rffi := map[string]interface{}{
+				"path":  myfolder + "/" + file.Name(),
+				"name":  file.Name(),
+				"isdir": true,
+			}
+			rere = append(rere, rffi)
+		} else {
+			//	fmt.Println(myfolder + "/" + file.Name())
+			rffi := map[string]interface{}{
+				"path":  myfolder + "/" + file.Name(),
+				"name":  file.Name(),
+				"isdir": false,
+			}
+			rere = append(rere, rffi)
+		}
+	}
+	res["data"] = rere
+	log.Println(res)
+
+	//	pwd,_ := os.Getwd()
+	//获取文件或目录相关信息
+	/*fileInfoList,err := ioutil.ReadDir("D:")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(len(fileInfoList))
+	for i := range fileInfoList {
+		fmt.Println(fileInfoList[i].Name()) //打印当前文件或目录下的文件或目录名
+	}*/
+}
+
+/*func main() {
 	filepath.Walk("D:\\app\\test",
 		func(path string, f os.FileInfo, err error) error {
 			if f == nil {
@@ -72,7 +108,7 @@ func main() {
 			}
 			return nil
 		})
-}
+}*/
 
 //func main()  {
 ////	var storageinfo []storageInfo
