@@ -2,7 +2,11 @@ package main
 
 import (
 	"context"
+	_ "encoding/json"
 	"fmt"
+	"github.com/asticode/go-astichartjs"
+	_ "github.com/asticode/go-astilectron"
+	_ "github.com/asticode/go-astilectron-bootstrap"
 	"github.com/genjidb/genji"
 	"github.com/genjidb/genji/document"
 	"log"
@@ -37,6 +41,170 @@ type EnginePath struct {
 	Path      string `genji:"path"`       //引擎地址
 }
 
+// Exploration represents the results of an exploration
+type Exploration struct {
+	Dirs       []Dir              `json:"dirs"`
+	Files      *astichartjs.Chart `json:"files,omitempty"`
+	FilesCount int                `json:"files_count"`
+	FilesSize  string             `json:"files_size"`
+	Path       string             `json:"path"`
+}
+
+// PayloadDir represents a dir payload
+type Dir struct {
+	Name string `json:"name"`
+	Path string `json:"path"`
+}
+
+/*func main()  {
+	dir,_ := os.Getwd()
+	fmt.Println("当前路径：",dir)
+	//文件相对路径
+//	dirPath := filepath.Dir(osPath)
+
+	//文件名
+
+//	fileName := filepath.Base(osPath)
+}*/
+
+/*func main()  {
+	path := ""
+	// If no path is provided, use the user's home dir
+
+		var u *user.User
+		u, err := user.Current()
+		if err != nil {
+			return
+		}
+		path = u.HomeDir
+		fmt.Println(path)
+
+	// Read dir
+	var files []os.FileInfo
+	if files, err = ioutil.ReadDir(path); err != nil {
+		return
+	}
+
+	// Init exploration
+	e := Exploration{
+		Dirs: []Dir{},
+		Path: path,
+	}
+
+	// Add previous dir
+	if filepath.Dir(path) != path {
+		e.Dirs = append(e.Dirs, Dir{
+			Name: "..",
+			Path: filepath.Dir(path),
+		})
+	}
+
+	// Loop through files
+	var sizes []int
+	var sizesMap = make(map[int][]string)
+	var filesSize int64
+	for _, f := range files {
+		if f.IsDir() {
+			e.Dirs = append(e.Dirs, Dir{
+				Name: f.Name(),
+				Path: filepath.Join(path, f.Name()),
+			})
+		} else {
+			var s = int(f.Size())
+			sizes = append(sizes, s)
+			sizesMap[s] = append(sizesMap[s], f.Name())
+			e.FilesCount++
+			filesSize += f.Size()
+		}
+	}
+
+	fmt.Println(e)
+
+	// Prepare files size
+	if filesSize < 1e3 {
+		e.FilesSize = strconv.Itoa(int(filesSize)) + "b"
+	} else if filesSize < 1e6 {
+		e.FilesSize = strconv.FormatFloat(float64(filesSize)/float64(1024), 'f', 0, 64) + "kb"
+	} else if filesSize < 1e9 {
+		e.FilesSize = strconv.FormatFloat(float64(filesSize)/float64(1024*1024), 'f', 0, 64) + "Mb"
+	} else {
+		e.FilesSize = strconv.FormatFloat(float64(filesSize)/float64(1024*1024*1024), 'f', 0, 64) + "Gb"
+	}
+
+	// Prepare files chart
+	sort.Ints(sizes)
+	if len(sizes) > 0 {
+		e.Files = &astichartjs.Chart{
+			Data: &astichartjs.Data{Datasets: []astichartjs.Dataset{{
+				BackgroundColor: []string{
+					astichartjs.ChartBackgroundColorYellow,
+					astichartjs.ChartBackgroundColorGreen,
+					astichartjs.ChartBackgroundColorRed,
+					astichartjs.ChartBackgroundColorBlue,
+					astichartjs.ChartBackgroundColorPurple,
+				},
+				BorderColor: []string{
+					astichartjs.ChartBorderColorYellow,
+					astichartjs.ChartBorderColorGreen,
+					astichartjs.ChartBorderColorRed,
+					astichartjs.ChartBorderColorBlue,
+					astichartjs.ChartBorderColorPurple,
+				},
+			}}},
+			Type: astichartjs.ChartTypePie,
+		}
+		var sizeOther int
+		for i := len(sizes) - 1; i >= 0; i-- {
+			for _, l := range sizesMap[sizes[i]] {
+				if len(e.Files.Data.Labels) < 4 {
+					e.Files.Data.Datasets[0].Data = append(e.Files.Data.Datasets[0].Data, sizes[i])
+					e.Files.Data.Labels = append(e.Files.Data.Labels, l)
+				} else {
+					sizeOther += sizes[i]
+				}
+			}
+		}
+		if sizeOther > 0 {
+			e.Files.Data.Datasets[0].Data = append(e.Files.Data.Datasets[0].Data, sizeOther)
+			e.Files.Data.Labels = append(e.Files.Data.Labels, "other")
+		}
+	}
+	return
+
+}*/
+
+/*func main() {
+	sysType := runtime.GOOS
+
+	if sysType == "linux" {
+		// LINUX系统
+		fmt.Println(sysType)
+	}
+
+	if sysType == "windows" {
+		// windows系统
+		fmt.Println(sysType)
+
+	}
+}
+*/
+
+//加固任务表
+type Task struct {
+	UUID       string `genji:"uuid"`        //uid
+	ClientKey  string `genji:"client_key"`  //客户密钥
+	ClientName string `genji:"client_name"` //客户名称
+	UserId     int    `genji:"user_id"`     //用户id
+	CreatedAt  string `genji:"created_at"`  //创建时间
+	EndAt      string `genji:"end_at"`      //结束时间
+	Status     string `json:"status"`       //任务状态（排队中 处理中 成功 失败）
+	Type       string `genji:"type"`        //加固类型  bticode
+	SubmitType string `genji:"submit_type"` //提交类型  WEB  or  GUI
+	TaskName   string `genji:"task_name"`   //任务名称
+	Version    string `genji:"version"`     //版本号
+	AllDate    string `genji:"all_date"`    //所有任务数据
+}
+
 func main() {
 
 	db, err := genji.Open("my.db")
@@ -47,7 +215,11 @@ func main() {
 	db = db.WithContext(context.Background())
 
 	// Query some documents
-	res, err := db.Query("SELECT *FROM enginepath")
+	//res, err := db.Query("SELECT *FROM task WHERE client_key = ? LIMIT ? OFFSET ?", "ct-rQuBr9KAjIUIzXwOP8n3LilFsprfyPzm", 1,2)
+	as := fmt.Sprintf("SELECT *FROM task WHERE client_key = '%s' LIMIT %d OFFSET %d", "ct-rQuBr9KAjIUIzXwOP8n3LilFsprfyPzm", 2, 2)
+	res, err := db.Query(as)
+	//	res, err := db.Query("SELECT *FROM task WHERE client_key = ? LIMIT 2 OFFSET 2", "ct-rQuBr9KAjIUIzXwOP8n3LilFsprfyPzm")
+	//	res, err := db.Query(as)
 	// always close the result when you're done with it
 	defer res.Close()
 
