@@ -1,13 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"time"
 )
 
 func main() {
-	fmt.Println("2021-03-01 15:46:15 +0800 CST".)
-	fmt.Println(getHourDiffer("2020-09-10 13:00:00", "2020-09-10 14:50:00"))
+	//fmt.Println("2021-03-01 15:46:15 +0800 CST".)
+	//fmt.Println(getHourDiffer("2020-09-10 13:00:00", "2020-09-10 14:50:00"))
 }
 
 //获取相差时间
